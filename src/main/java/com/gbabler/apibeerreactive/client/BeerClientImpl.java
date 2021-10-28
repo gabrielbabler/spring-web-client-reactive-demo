@@ -1,5 +1,6 @@
 package com.gbabler.apibeerreactive.client;
 
+import com.gbabler.apibeerreactive.config.WebClientProperties;
 import com.gbabler.apibeerreactive.model.BeerDTO;
 import com.gbabler.apibeerreactive.model.BeerPagedList;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,10 @@ public class BeerClientImpl implements BeerClient {
 
     @Override
     public Mono<BeerPagedList> listBeers(Integer pageNumber, Integer pageSize, String beerName, String beerStyle, Boolean showInventoryOnHand) {
-        return null;
+        return webClient.get()
+                .uri(WebClientProperties.BEER_V1_PATH)
+                .retrieve()
+                .bodyToMono(BeerPagedList.class);
     }
 
     @Override
