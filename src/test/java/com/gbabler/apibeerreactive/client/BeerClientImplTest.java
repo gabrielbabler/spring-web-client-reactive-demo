@@ -8,16 +8,16 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BeerClientImplTest {
 
@@ -75,6 +75,27 @@ class BeerClientImplTest {
 
         assertThat(beer.getId()).isEqualTo(id);
         assertThat(beer.getQuantityOnHand()).isNull();
+    }
+
+    @Test
+    void functionTestGetBeerById() throws InterruptedException {
+        AtomicReference<String> beerName = new AtomicReference<>();
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        beerClient.listBeers(null, null, null, null,
+                null)
+                .map(beerPagedList -> beerPagedList.getContent().get(0).getId())
+                .map(beerId -> beerClient.getBeerById(beerId, false))
+                .flatMap(mono -> mono)
+                .subscribe(beerDTO -> {
+                    System.out.println(beerDTO.getBeerName());
+                    beerName.set(beerDTO.getBeerName());
+                    assertThat(beerDTO.getBeerName()).isEqualTo("No Hammers On The Bar");
+                    countDownLatch.countDown();
+                });
+        countDownLatch.await();
+
+        assertThat(beerName.get()).isEqualTo("No Hammers On The Bar");
     }
 
     @Test
