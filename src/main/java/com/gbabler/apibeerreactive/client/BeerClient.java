@@ -14,7 +14,7 @@ public interface BeerClient {
     Mono<BeerPagedList> listBeers(Integer pageNumber, Integer pageSize, String beerName,
                                   String beerStyle, Boolean showInventoryOnHand);
 
-    Mono<ResponseEntity> createBeer(BeerDTO beerDTO);
+    Mono<ResponseEntity<Void>> createBeer(BeerDTO beerDTO);
 
     Mono<ResponseEntity> updateBeer(BeerDTO beerDto);
 
